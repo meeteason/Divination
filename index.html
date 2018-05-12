@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1.0">
+  <title>每日一占--星云链DAPP</title>
+  <link rel="stylesheet" href="static/bootstrap4/css/bootstrap.min.css">
+  <link rel="stylesheet" href="static/bootstrap-datepicker/css/bootstrap-datepicker.min.css">
+  <link rel="stylesheet" href="static/css/style.css">
+</head>
+
+<body>
+  <canvas id="canvasNebulas"></canvas>
+
+  <div class="container">
+    <div class="center-block" style="max-height: 100%;">
+      <h2 class="text-center" style="padding-top:1em">
+        每日一占，驱凶辟邪
+      </h2>
+      <div class="white-color" id="result" style="max-width:768px;margin:0 auto;display:none">
+       
+      </div>
+      <p class="text-center mt-4">
+        <div class="alert alert-danger" id="nolettershow" role="alert" style="display:none">
+          <span>未检测到钱包，请安装NAS钱包后在试！</span>
+        </div>
+        <div class="alert alert-danger" id="nolettershow1" role="alert" style="display:none">
+            <span>今日您还未进行占卜！</span>
+          </div>
+        <div class="input-group mb-3" style="max-width:768px;margin:0 auto;">
+          <input type="text" class="form-control" id="txtAddress" placeholder="请输入你的钱包地址" aria-label="请输入你的钱包地址" aria-describedby="basic-addon2">
+          <div class="input-group-append">
+            <button class="btn btn-secondary" id="btnGetWrite" type="button">占卜</button>
+          </div>
+        </div>
+      </p>
+      <p id="button-group" class="text-center mt-4">
+        <!-- <button type="button" class="btn btn-secondary btn-lg mt-3" data-toggle="modal" data-target="#modalWrite">开始写信</button> -->
+        <a class="btn btn-secondary btn-lg ml-3 mr-3 mt-3" href="https://github.com/ChengOrangeJu/WebExtensionWallet" target="_blank">安装NAS钱包</a>
+        <a class="btn btn-outline-secondary btn-lg mt-3" href="https://github.com/meeteason/ForFutrue" target="_blank">GITHUB</a>
+      </p>
+
+      <p class="grey-color">
+        小贴士：</p>
+      <ol class="grey-color">
+        <li>每日占卜：在此可以问卜您每日的事业运，财运，爱情运势，健康运，考试运程等。</li>
+        <li>至诚相求：问卜测试前，你可以对测试占卜问卦持怀疑态度，但在问卜测试的一刻，你必须至敬至诚，才能感应卦神赐降正确的卦像。</li>
+        <li>发问准确：问卜者必须清楚自己要问的问题，发问准确，才能得到正确的结论。</li>
+        <li>每日一问：每天可以测算一次，多试未必灵验。</li>
+        <li>做好心理准备：问卜前，应对问卜结果做心理准备。</li>
+        <li>每日免费算卦占卜服务仅供游戏娱乐，本网不对此预测结果作任何承诺。</li>
+      </ol>
+
+    </div>
+  </div>
+  <!-- Modal Write-->
+  <div class="modal fade" id="modalWrite" tabindex="-1" role="dialog" aria-labelledby="modalWriteTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalWriteTitle">开始写信</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="alert alert-danger" style="display:none" role="alert">
+
+          </div>
+          <div class="alert alert-success" style="display:none" role="alert">
+
+          </div>
+          <div class="form-group">
+            <label for="txtExpire">到达时间</label>
+            <input type="text" id="txtExpire" class="form-control" placeholder="选择时间">
+            <small id="emailHelp" class="form-text text-muted">信件内容将在您选定时间到达</small>
+          </div>
+          <div class="form-group">
+            <label for="txtContent">内容</label>
+            <textarea class="form-control" id="txtContent" rows="5"></textarea>
+          </div>
+          <div class="form-check">
+            <input type="checkbox" class="form-check-input" checked="checked" id="coverData">
+            <label class="form-check-label" for="coverData">覆盖之前写过的信</label>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+          <button type="button" id="saveWrite" class="btn btn-primary">发送</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Modal Find result-->
+  <div class="modal fade" id="modalFind" tabindex="-1" role="dialog" aria-labelledby="modalFindTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="modalFindTitle">信件内容</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <pre></pre>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">关闭</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Modal Loading-->
+  <div class="modal fade" id="modalLoading" tabindex="-1" data-backdrop="static" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-body">
+          <div class="progress">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0"
+              aria-valuemax="100" style="width: 100%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="static/js/nebulas.min.js"></script>
+  <script src="static/js/nebPay.js"></script>
+  <script src="static/js/jquery-3.3.1.min.js"></script>
+  <script src="static/bootstrap4/js/bootstrap.bundle.min.js"></script>
+  <script src="static/bootstrap-datepicker/js/bootstrap-datepicker.min.js"></script>
+  <script src="static/bootstrap-datepicker/js/bootstrap-datepicker.zh-CN.min.js"></script>
+  <!-- <script src="static/js/Nebulas.js"></script> -->
+  <script src="static/js/dat.gui.min.js"></script>
+  <script src="static/js/background.js"></script>
+  <script src="static/js/dayjs.min.js"></script>
+  <script src="static/js/countDown.js"></script>
+  <script src="static/js/data.js"></script>
+  <script src="static/js/main.js"></script>
+
+</body>
+
+</html>
