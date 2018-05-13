@@ -10,7 +10,7 @@ var nebPay = new NebPay();
 
 // ****Testnet****//
 myneb.setRequest(new HttpRequest("https://testnet.nebulas.io"));
-var dapp_address = "n1vQPkkyf84MLCWzSZLpnbFqp3FvhCj4PEh";
+var dapp_address = "n1iT5rdem9st7TjszoEHB46ejudPikCcvrP";
 
 
 // ****Maintnet****//
@@ -32,82 +32,21 @@ $(function () {
         forceParse: false,
         todayHighlight: true
     });
-    // //提交写入
-    // $("#saveWrite").click(function () {
-    //     var date = dayjs($('#txtExpire').val()),
-    //         content = $("#txtContent").val();
-    //     var alertError = $("#modalWrite .alert-danger"),
-    //         alertSuccess = $("#modalWrite .alert-success")
-
-    //     if (!content) {
-    //         alertError.text("信件内容不能为空！请对自己的未来负责").show();
-    //         setTimeout(function () {
-    //             alertError.hide()
-    //         }, 2000);
-    //         return
-    //     }
-
-    //     if (!date.isValid()) {
-    //         alertError.text("时间格式错误，请重新输入！").show();
-    //         setTimeout(function () {
-    //             alertError.hide()
-    //         }, 2000);
-    //         return
-    //     }
-
-    //     var expire = date.diff(dayjs())
-    //     if (expire > 0) {
-    //         var cover = $("#coverData").prop("checked")
-    //         showLoading();
-    //         write($("#txtContent").val(), expire, cover, function (data) {
-
-    //             hideLoading();
-
-    //             if (data.code == 0) {
-    //                 console.log("wirte success,and then get your content...")
-    //                 alertSuccess.text("您的信发送成功！").show()
-    //                 setTimeout(function () {
-    //                     alertSuccess.hide()
-    //                 }, 2000);
-
-    //                 localStorage.setItem("yourAddress", data.data.from)
-    //                 $("#txtAddress").val(data.data.from)
-    //                 getYours(data.data.from).then(function (rep) {
-    //                     console.log("get yours success", rep)
-    //                 })
-
-    //             } else {
-    //                 console.error(data)
-    //             }
-    //         })
-    //     } else {
-    //         // The date time wrong
-    //         //TODO
-    //         alertError.text("时间格式错误，请重新输入！").show();
-    //         setTimeout(function () {
-    //             alertError.hide()
-    //         }, 2000);
-    //     }
-
-    // });
 
     $("#btnGetWrite").click(function () {
         var _address = $("#txtAddress").val()
         if (!!_address && _address.length == 35 && _address.startsWith("n1")) {
             showLoading()
             getYours(_address).then(function (rep) {
+                
+                // debugger
                 hideLoading();
                 var data = JSON.parse(rep.result)
+                localStorage.setItem("yourAddress", data.from)
                 // showYourCentent(data)
                 if (data.status != 0) {
-                    write(function (data) {
-                        hideLoading();
-                        if (data.code == 0) {
-                            getYours(_address);
-                        } else {
-                            console.error(data)
-                        }
-                    })
+                    showLoading()
+                    zhanbu();
                 } else {
                     showYourCentent(data)
                 }
@@ -115,6 +54,7 @@ $(function () {
         } else {
             //the address wrong format
             //TODO
+            // zhanbu();
             alert("请输入正确的钱包地址！")
         }
     });
@@ -126,9 +66,47 @@ $(function () {
     }
 })
 
+var countDown = 0
+function zhanbu() {
+    if (countDown < 10) {
+        $("#modalCountdown p span").html(10 - countDown);
+        $("#modalCountdown").modal("show")
+        countDown++;
+        setTimeout(zhanbu, 1000)
+    } else {
+        var _address = $("#txtAddress").val()
+        $("#modalCountdown").modal("hide")
+        showLoading()
+        write(function (data) {
+            hideLoading();
+            if (data.code == 0) {
+                // debugger
+                showLoading()
+                setTimeout(function () {
+                    getYours(_address).then(function (rep) {
+                        hideLoading();
+                        var data = JSON.parse(rep.result)
+                        localStorage.setItem("yourAddress", data.from)
+                        // showYourCentent(data)
+                        if (data.status != 0) {
+                            // showLoading()
+
+                        } else {
+                            showYourCentent(data)
+                        }
+                    });
+                }, 3000)
+
+            } else {
+                console.error(data)
+            }
+        })
+    }
+}
 function showYourCentent(data) {
     if (data.status == 0) {
         $("#result").html(_divination[parseInt(data.random)]).show("fade")
+        $("#result font").html(dayjs().format("公元YYYY年MM月DD日"))
         $(".input-group,#button-group").hide("fade")
 
     } else if (data.status == -2) {
@@ -223,6 +201,8 @@ function write(callback) {
         }).catch(function (error) {
             console.error("run write error", error)
             _loopCall = setTimeout(_loopFunc, 1000)
+            hideLoading();
+            alert("生成失败！")
         })
     }
     _loopCall = setTimeout(_loopFunc, 1000)

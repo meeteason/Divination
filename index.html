@@ -19,15 +19,15 @@
         每日一占，驱凶辟邪
       </h2>
       <div class="white-color" id="result" style="max-width:768px;margin:0 auto;display:none">
-       
+
       </div>
       <p class="text-center mt-4">
         <div class="alert alert-danger" id="nolettershow" role="alert" style="display:none">
           <span>未检测到钱包，请安装NAS钱包后在试！</span>
         </div>
         <div class="alert alert-danger" id="nolettershow1" role="alert" style="display:none">
-            <span>今日您还未进行占卜！</span>
-          </div>
+          <span>今日您还未进行占卜！</span>
+        </div>
         <div class="input-group mb-3" style="max-width:768px;margin:0 auto;">
           <input type="text" class="form-control" id="txtAddress" placeholder="请输入你的钱包地址" aria-label="请输入你的钱包地址" aria-describedby="basic-addon2">
           <div class="input-group-append">
@@ -44,6 +44,8 @@
       <p class="grey-color">
         小贴士：</p>
       <ol class="grey-color">
+        <li>如未显示结果，请稍后再试，或再次点击占卜按钮！</li>
+        <li>每个钱包地址，每日仅可占卜一次，重复占卜只会显示同样的结果！</li>
         <li>每日占卜：在此可以问卜您每日的事业运，财运，爱情运势，健康运，考试运程等。</li>
         <li>至诚相求：问卜测试前，你可以对测试占卜问卦持怀疑态度，但在问卜测试的一刻，你必须至敬至诚，才能感应卦神赐降正确的卦像。</li>
         <li>发问准确：问卜者必须清楚自己要问的问题，发问准确，才能得到正确的结论。</li>
@@ -120,6 +122,22 @@
             <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0"
               aria-valuemax="100" style="width: 100%"></div>
           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Modal Countdown-->
+  <div class="modal fade" id="modalCountdown" tabindex="-1" data-backdrop="static" role="dialog">
+    <div class="modal-dialog" role="document">
+      <div class="modal-content">
+        <div class="modal-body">
+          <div class="progress">
+            <div class="progress-bar progress-bar-striped progress-bar-animated" role="progressbar" aria-valuenow="100" aria-valuemin="0"
+              aria-valuemax="100" style="width: 100%"></div>
+          </div>
+          <p style="margin: 1rem 0 0;text-align: center;">心中默念您的姓名，出生日期（生辰八字）
+            <span></span>秒钟</p>
         </div>
       </div>
     </div>

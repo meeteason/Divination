@@ -54,11 +54,12 @@ Divination.prototype = {
     getDivination: function () {
         var yourDivination = this.Today.get(Blockchain.transaction.from)
         if (yourDivination) {
-            if (new BigNumber(yourDivination.date).plus(1000 * 60 * 60 * 24).lte(new BigNumber(Date.now))) {
+            if (new BigNumber(yourDivination.date).plus(1000 * 60 * 60 * 24).lte(new BigNumber(Date.now()))) {
                 return this._write()
             } else {
                 return {
-                    status: -1
+                    status: -1,
+                    from: Blockchain.transaction.from
                 }
             }
         } else {
@@ -72,12 +73,14 @@ Divination.prototype = {
         var _random = parseInt(Math.random() * this.IndexCount);
         this.Today.put(Blockchain.transaction.from, {
             date: Date.now(),
-            random: _random
+            random: _random,
+            from: Blockchain.transaction.from
         })
 
         return {
             status: 0,
-            random: _random
+            random: _random,
+            from: Blockchain.transaction.from
         }
     },
     getYours() {
@@ -85,11 +88,13 @@ Divination.prototype = {
         if (yourDivination) {
             return {
                 status: 0,
-                random: yourDivination.random
+                random: yourDivination.random,
+                from: Blockchain.transaction.from
             }
         } else {
             return {
-                status: -2
+                status: -2,
+                from: Blockchain.transaction.from
             }
         }
     },
