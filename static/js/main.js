@@ -9,13 +9,13 @@ var nebPay = new NebPay();
 
 
 // ****Testnet****//
-myneb.setRequest(new HttpRequest("https://testnet.nebulas.io"));
-var dapp_address = "n1iT5rdem9st7TjszoEHB46ejudPikCcvrP";
+// myneb.setRequest(new HttpRequest("https://testnet.nebulas.io"));
+// var dapp_address = "n1iT5rdem9st7TjszoEHB46ejudPikCcvrP";
 
 
 // ****Maintnet****//
-// myneb.setRequest(new HttpRequest("https://mainnet.nebulas.io"));
-// var dapp_address = "n1rLwYTJQgLbzv8JTCvcjXnffwqpD1bwowK";
+myneb.setRequest(new HttpRequest("https://mainnet.nebulas.io"));
+var dapp_address = "n1gjS5bBMWfeYmFM57FSsJchDQHGKZiR2cd";
 
 
 // if(typeof(webExtensionWallet) === "undefined") {
