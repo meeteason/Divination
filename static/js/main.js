@@ -3,6 +3,7 @@ var Neb = require("nebulas").Neb;
 var Account = require("nebulas").Account;
 var Transaction = require("nebulas").Transaction;
 var Unit = require("nebulas").Unit;
+var Utils = require("nebulas").Utils;
 var myneb = new Neb();
 var NebPay = require("nebpay");
 var nebPay = new NebPay();
@@ -24,6 +25,11 @@ var dapp_address = "n1vQPkkyf84MLCWzSZLpnbFqp3FvhCj4PEh";
 //     console.log('星云钱包环境运行成功');
 // }
 
+// var isGetAccount = false;
+
+var nasApi = myneb.api;
+var address = ""
+var balance = 0;
 $(function () {
     checkWallet();
     $('#txtExpire').datepicker({
@@ -115,15 +121,15 @@ $(function () {
         } else {
             //the address wrong format
             //TODO
-            alert("请输入正确的钱包地址！")
+            alert("未获得钱包地址，请正确安装NAS钱包！")
         }
     });
 
-    var yourAddress = localStorage.getItem("yourAddress")
-    if (!!yourAddress) {
-        // getYours(yourAddress)
-        $("#txtAddress").val(yourAddress)
-    }
+    // var yourAddress = localStorage.getItem("yourAddress")
+    // if (!!yourAddress) {
+    //     // getYours(yourAddress)
+    //     $("#txtAddress").val(yourAddress)
+    // }
 })
 
 function showYourCentent(data) {
@@ -244,4 +250,35 @@ function showLoading() {
 
 function hideLoading() {
     $("#modalLoading").modal("hide")
+}
+
+
+window.postMessage({
+    "target": "contentscript",
+    "data": {},
+    "method": "getAccount",
+}, "*");
+
+window.addEventListener('message', function (e) {
+    if (e.data && e.data.data) {
+        if (e.data.data.account) {
+            address = e.data.data.account
+            $("#txtAddress").val(address)
+            getAccountState();
+
+            // Unit.fromBasic(Utils.toBigNumber(resp.balance), "nas").toNumber()
+            // app.updateUserInfo()
+        }
+    }
+})
+
+function getAccountState() {
+    nasApi.getAccountState({
+        address: address
+    }).then(function (resp) {
+        if (resp.error) {
+            this.$message.error(resp.error)
+        }
+        balance = Unit.fromBasic(Utils.toBigNumber(resp.balance), "nas").toNumber()
+    })
 }
