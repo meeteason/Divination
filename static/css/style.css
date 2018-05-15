@@ -28,8 +28,12 @@ body {
     align-items: center;
     height: 100%;
     width: 100%;
-}
 
+}
+font{
+    background:#ccc;
+    padding: 2px;
+}
 .center-block {
     /* padding-top: 30%; */
 }

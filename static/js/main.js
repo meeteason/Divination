@@ -11,12 +11,12 @@ var nebPay = new NebPay();
 
 // ****Testnet****//
 myneb.setRequest(new HttpRequest("https://testnet.nebulas.io"));
-var dapp_address = "n1vQPkkyf84MLCWzSZLpnbFqp3FvhCj4PEh";
+var dapp_address = "n1wuL1fizZvsmLo1u7BiszgiEyHCS8RiWAQ";
 
 
 // ****Maintnet****//
 // myneb.setRequest(new HttpRequest("https://mainnet.nebulas.io"));
-// var dapp_address = "n1rLwYTJQgLbzv8JTCvcjXnffwqpD1bwowK";
+// var dapp_address = "n1gjS5bBMWfeYmFM57FSsJchDQHGKZiR2cd";
 
 
 // if(typeof(webExtensionWallet) === "undefined") {
@@ -32,92 +32,18 @@ var address = ""
 var balance = 0;
 $(function () {
     checkWallet();
-    $('#txtExpire').datepicker({
-        format: "yyyy-mm-dd 23:59:59",
-        startDate: dayjs().format("YYYY-MM-DD HH:mm:ss"),
-        forceParse: false,
-        todayHighlight: true
-    });
-    // //提交写入
-    // $("#saveWrite").click(function () {
-    //     var date = dayjs($('#txtExpire').val()),
-    //         content = $("#txtContent").val();
-    //     var alertError = $("#modalWrite .alert-danger"),
-    //         alertSuccess = $("#modalWrite .alert-success")
-
-    //     if (!content) {
-    //         alertError.text("信件内容不能为空！请对自己的未来负责").show();
-    //         setTimeout(function () {
-    //             alertError.hide()
-    //         }, 2000);
-    //         return
-    //     }
-
-    //     if (!date.isValid()) {
-    //         alertError.text("时间格式错误，请重新输入！").show();
-    //         setTimeout(function () {
-    //             alertError.hide()
-    //         }, 2000);
-    //         return
-    //     }
-
-    //     var expire = date.diff(dayjs())
-    //     if (expire > 0) {
-    //         var cover = $("#coverData").prop("checked")
-    //         showLoading();
-    //         write($("#txtContent").val(), expire, cover, function (data) {
-
-    //             hideLoading();
-
-    //             if (data.code == 0) {
-    //                 console.log("wirte success,and then get your content...")
-    //                 alertSuccess.text("您的信发送成功！").show()
-    //                 setTimeout(function () {
-    //                     alertSuccess.hide()
-    //                 }, 2000);
-
-    //                 localStorage.setItem("yourAddress", data.data.from)
-    //                 $("#txtAddress").val(data.data.from)
-    //                 getYours(data.data.from).then(function (rep) {
-    //                     console.log("get yours success", rep)
-    //                 })
-
-    //             } else {
-    //                 console.error(data)
-    //             }
-    //         })
-    //     } else {
-    //         // The date time wrong
-    //         //TODO
-    //         alertError.text("时间格式错误，请重新输入！").show();
-    //         setTimeout(function () {
-    //             alertError.hide()
-    //         }, 2000);
-    //     }
-
+    // $('#txtExpire').datepicker({
+    //     format: "yyyy-mm-dd 23:59:59",
+    //     startDate: dayjs().format("YYYY-MM-DD HH:mm:ss"),
+    //     forceParse: false,
+    //     todayHighlight: true
     // });
 
     $("#btnGetWrite").click(function () {
         var _address = $("#txtAddress").val()
         if (!!_address && _address.length == 35 && _address.startsWith("n1")) {
             showLoading()
-            getYours(_address).then(function (rep) {
-                hideLoading();
-                var data = JSON.parse(rep.result)
-                // showYourCentent(data)
-                if (data.status != 0) {
-                    write(function (data) {
-                        hideLoading();
-                        if (data.code == 0) {
-                            getYours(_address);
-                        } else {
-                            console.error(data)
-                        }
-                    })
-                } else {
-                    showYourCentent(data)
-                }
-            })
+            zhanbu();
         } else {
             //the address wrong format
             //TODO
@@ -132,10 +58,38 @@ $(function () {
     // }
 })
 
+var countDown = 0
+
+function zhanbu() {
+    if (countDown < 10) {
+        $("#modalCountdown p span").html(10 - countDown);
+        $("#modalCountdown").modal("show")
+        countDown++;
+        setTimeout(zhanbu, 1000)
+    } else {
+        var _address = $("#txtAddress").val()
+        $("#modalCountdown").modal("hide")
+        showLoading()
+        write(function (data) {
+            hideLoading();
+            if (data.status == 0) {
+                showYourCentent(data)
+            } else {
+                console.error(data)
+            }
+        })
+    }
+}
+
 function showYourCentent(data) {
     if (data.status == 0) {
-        $("#result").html(_divination[parseInt(data.random)]).show("fade")
-        $(".input-group,#button-group").hide("fade")
+
+        $.get("static/data/" + data.random + ".txt").then(function (data) {
+            debugger
+            $("#result").html(data).show("fade")
+            $("#result font").html(dayjs().format("公元YYYY年MM月DD日"))
+            $(".input-group,#button-group").hide("fade")
+        })
 
     } else if (data.status == -2) {
         console.log("未写入任何信息")
@@ -197,11 +151,30 @@ function write(callback) {
     var callArgs = JSON.stringify([]);
 
     var _loopCall = null;
+    var _loopCount = 0;
     var _listener = function (rep) {
-        //   debugger;
+        // debugger;
         console.log(rep)
+        _loopCount++;
         if (typeof rep == "string" && rep.indexOf("Error") != -1) {
             clearTimeout(_loopCall)
+        } else {
+            nasApi.getTransactionReceipt({
+                hash: rep.txhash
+            }).then(function (receipt) {
+                if (receipt.status === 1) {
+                    // 交易成功
+                    _call.call(this, JSON.parse(receipt.execute_result))
+                } else {
+                    if (_loopCount >= 60) {
+                        alert("交易失败，请刷新后重试")
+                    } else {
+                        _loopCall = setTimeout(function(){
+                            _listener(rep)
+                        }, 1000)
+                    }
+                }
+            });
         }
     }
 
@@ -216,22 +189,24 @@ function write(callback) {
         },
         listener: _listener
     });
-    // debugger;
-    var _loopFunc = function () {
-        console.log(serialNumber)
-        nebPay.queryPayInfo(serialNumber).then(function (rep) {
-            var data = JSON.parse(rep)
-            if (data.code == 0) {
-                _call.call(this, data)
-            } else {
-                _loopCall = setTimeout(_loopFunc, 1000)
-            }
-        }).catch(function (error) {
-            console.error("run write error", error)
-            _loopCall = setTimeout(_loopFunc, 1000)
-        })
-    }
-    _loopCall = setTimeout(_loopFunc, 1000)
+    // // debugger;
+    // var _loopFunc = function () {
+    //     console.log(serialNumber)
+    //     nebPay.queryPayInfo(serialNumber).then(function (rep) {
+    //         var data = JSON.parse(rep)
+    //         if (data.code == 0) {
+    //             _call.call(this, data)
+    //         } else {
+    //             _loopCall = setTimeout(_loopFunc, 1000)
+    //         }
+    //     }).catch(function (error) {
+    //         console.error("run write error", error)
+    //         _loopCall = setTimeout(_loopFunc, 1000)
+    //         hideLoading();
+    //         alert("生成失败！")
+    //     })
+    // }
+    // _loopCall = setTimeout(_loopFunc, 1000)
 
 
 }
@@ -262,6 +237,7 @@ window.postMessage({
 window.addEventListener('message', function (e) {
     if (e.data && e.data.data) {
         if (e.data.data.account) {
+            // debugger
             address = e.data.data.account
             $("#txtAddress").val(address)
             getAccountState();
@@ -280,5 +256,19 @@ function getAccountState() {
             this.$message.error(resp.error)
         }
         balance = Unit.fromBasic(Utils.toBigNumber(resp.balance), "nas").toNumber()
+        $("#btnGetWrite").prop("disabled", false)
+        getYours(address).then(function (rep) {
+            // debugger
+            // hideLoading();
+            var data = JSON.parse(rep.result)
+            // localStorage.setItem("yourAddress", data.from)
+            // showYourCentent(data)
+            if (data.status != 0) {
+                // showLoading()
+                // zhanbu();
+            } else {
+                showYourCentent(data)
+            }
+        })
     })
 }
